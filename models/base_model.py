@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from datetime import datetime
 from uuid import uuid4
+import models
 
 """
 Module BaseModel
@@ -21,6 +22,8 @@ class BaseModel():
     def __init__(self, *args, **kwargs):
         """
         Initialize attributes: random uuid, dates created/updated
+
+
         """
         if kwargs:
             for key, val in kwargs.items():
@@ -34,10 +37,11 @@ class BaseModel():
                     pass
                 else:
                     setattr(self, key, val)
-
-        self.id = str(uuid4())
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
+        else:
+            self.id = str(uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
+            models.storage.new(self)
 
     def __str__(self):
         """
@@ -46,18 +50,28 @@ class BaseModel():
         return ('[{}] ({}) {}'.
                 format(self.__class__.__name__, self.id, self.__dict__))
 
+    def __repr__(self):
+        """
+        returns string representation
+        """
+        return (self.__str__())
+
     def save(self):
+        """
+        Update instance with updated time & save to serialized file
+        """
         self.updated_at = datetime.now()
+        models.storage.save()
 
     def to_dict(self):
         """
         Return dic with string formats of times; add class info to dic
         """
-        dict = {}
-        dict["__class__"] = self.__class__.__name__
+        dic = {}
+        dic["__class__"] = self.__class__.__name__
         for k, v in self.__dict__.items():
             if isinstance(v, (datetime, )):
-                dict[k] = v.isoformat()
+                dic[k] = v.isoformat()
             else:
-                dict[k] = v
-        return dict
+                dic[k] = v
+        return dic
