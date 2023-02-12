@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from datetime import datetime
 from uuid import uuid4
-import models
+from models import storage
 
 """
 Module BaseModel
@@ -16,14 +16,12 @@ class BaseModel():
         __str__(self)
         __save(self)
         __repr__(self)
-        to_dict
+        to_dict(self)
     """
 
     def __init__(self, *args, **kwargs):
         """
         Initialize attributes: random uuid, dates created/updated
-
-
         """
         if kwargs:
             for key, val in kwargs.items():
@@ -37,11 +35,11 @@ class BaseModel():
                     pass
                 else:
                     setattr(self, key, val)
-        else:
-            self.id = str(uuid4())
-            self.created_at = datetime.now()
-            self.updated_at = datetime.now()
-            models.storage.new(self)
+
+        self.id = str(uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = datetime.now()
+        storage.new(self)
 
     def __str__(self):
         """
@@ -50,28 +48,19 @@ class BaseModel():
         return ('[{}] ({}) {}'.
                 format(self.__class__.__name__, self.id, self.__dict__))
 
-    def __repr__(self):
-        """
-        returns string representation
-        """
-        return (self.__str__())
-
     def save(self):
-        """
-        Update instance with updated time & save to serialized file
-        """
         self.updated_at = datetime.now()
-        models.storage.save()
+        storage.save(self)
 
     def to_dict(self):
         """
         Return dic with string formats of times; add class info to dic
         """
-        dic = {}
-        dic["__class__"] = self.__class__.__name__
+        dict = {}
+        dict["__class__"] = self.__class__.__name__
         for k, v in self.__dict__.items():
             if isinstance(v, (datetime, )):
-                dic[k] = v.isoformat()
+                dict[k] = v.isoformat()
             else:
-                dic[k] = v
-        return dic
+                dict[k] = v
+        return dict
