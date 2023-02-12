@@ -16,7 +16,7 @@ class BaseModel():
         __str__(self)
         __save(self)
         __repr__(self)
-        to_dict(self)
+        to_dict
     """
 
     def __init__(self, *args, **kwargs):
